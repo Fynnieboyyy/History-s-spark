@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3o7Q8fH8fYQ6a5cVQ5qT4q5qT4q5Q=" crossorigin="">
+  <!-- De vorige SRI-hash was ongeldig, waardoor Leaflet-CSS door de browser werd geblokkeerd. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     :root { --ink:#332619; --paper:#ead6aa; --paper-dark:#c29b5e; --rust:#783b27; }
     * { box-sizing:border-box; }
@@ -20,15 +21,16 @@
     .intro { margin-bottom:20px; color:var(--paper); }
     .intro h2 { margin:0 0 8px; font:700 clamp(1.7rem,4vw,3rem) 'Cinzel',serif; }
     .intro p { margin:0; font:italic 1rem 'IM Fell English',serif; }
-    .map-frame { position:relative; overflow:hidden; padding:clamp(12px,2vw,28px); border:10px double var(--rust); background:var(--paper); box-shadow:0 20px 55px rgba(20,10,4,.4),inset 0 0 35px rgba(120,75,30,.25); }
+    .map-frame { position:relative; overflow:hidden; padding:clamp(12px,2vw,28px); border:10px double var(--rust); background:var(--paper); box-shadow:0 20px 55px rgba(20,10,4,.4),inset 0 0 35px rgba(51,38,25,.18); }
     .map-frame::before { content:'CARTA MUNDI · ANNO DOMINI'; position:absolute; top:9px; left:50%; transform:translateX(-50%); z-index:2; color:var(--rust); font:700 clamp(.55rem,1.3vw,.8rem) 'Cinzel',serif; white-space:nowrap; }
     #map { height:min(72vh,760px); min-height:460px; margin-top:22px; border:1px solid rgba(51,38,25,.45); background:#a9c8c4; }
     .leaflet-container { font-family:'Libre Baskerville',serif; }
-    .country-label { color:#332619; text-shadow:1px 1px 0 #ead6aa,-1px -1px 0 #ead6aa; font-size:10px; font-weight:700; white-space:nowrap; }
-    .capital-label { color:#4c1e13; text-shadow:1px 1px 0 #ead6aa,-1px -1px 0 #ead6aa; font-size:10px; font-weight:700; white-space:nowrap; }
+    .country-label,.capital-label { text-shadow:1px 1px 0 #ead6aa,-1px -1px 0 #ead6aa; font-size:10px; font-weight:700; white-space:nowrap; }
+    .country-label { color:#332619; }
+    .capital-label { color:#4c1e13; }
     .capital-marker { width:10px!important; height:10px!important; margin-left:-5px!important; margin-top:-5px!important; border:2px solid #fff; border-radius:50%; background:#8b2d1d; box-shadow:0 1px 4px #332619; }
     .legend { display:flex; flex-wrap:wrap; justify-content:center; gap:18px; padding:15px 5px 2px; color:#49321f; font-size:.78rem; }
-    .legend span::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border-radius:50%; background:#8b2d1d; border:2px solid #fff; box-shadow:0 0 0 1px #8b2d1d; }
+    .legend span::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border-radius:50%; background:#8b2d1d; border:2px solid #fff; box-shadow:0 1px 3px #332619; }
     .legend span:first-child::before { border-radius:2px; background:#b7874e; border:0; box-shadow:0 0 0 1px #704b2b; }
     #status { margin:10px 0 0; text-align:center; color:#6d4323; font-size:.78rem; }
     .popup-title { margin:0 0 5px; color:var(--rust); font:700 1.05rem 'Cinzel',serif; }
@@ -45,59 +47,71 @@
       <div class="legend"><span>Land</span><span>Hoofdstad</span></div>
     </section>
   </main>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map', { minZoom: 2, worldCopyJump: true }).setView([20, 5], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> bijdragers',
-      maxZoom: 7
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> bijdragers', maxZoom: 7
     }).addTo(map);
 
     const countryStyle = { color:'#704b2b', weight:1, fillColor:'#b7874e', fillOpacity:.72 };
     const selectedStyle = { color:'#783b27', weight:2, fillColor:'#d3a05b', fillOpacity:.9 };
     const capitalLayer = L.layerGroup().addTo(map);
     let countriesByCode = {};
+    const status = document.getElementById('status');
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
 
     function countryName(feature) {
-      return feature.properties.ADMIN || feature.properties.name || feature.properties.NAME || 'Onbekend land';
+      const p = feature.properties || {};
+      return p.ADMIN || p.NAME_EN || p.name || p.NAME || 'Onbekend land';
+    }
+
+    function countryCode(feature) {
+      const p = feature.properties || {};
+      return p.ISO_A3 || p.ADM0_A3 || p.iso_a3 || p.ISO3 || p.cca3;
     }
 
     function showCountry(feature, layer) {
-      const code = feature.properties.ISO_A3 || feature.properties.ADM0_A3 || feature.properties.iso_a3;
-      const country = countriesByCode[code];
+      const country = countriesByCode[countryCode(feature)];
       const name = countryName(feature);
       const capital = country && country.capital ? country.capital[0] : 'Geen officiële hoofdstad gevonden';
-      layer.bindPopup('<h3 class="popup-title">' + name + '</h3><strong>Hoofdstad:</strong> ' + capital);
+      layer.bindPopup('<h3 class="popup-title">' + escapeHtml(name) + '</h3><strong>Hoofdstad:</strong> ' + escapeHtml(capital));
       layer.bindTooltip(name, { className:'country-label', sticky:true, direction:'center', opacity:.9 });
       layer.on({ mouseover:e => e.target.setStyle(selectedStyle), mouseout:e => e.target.setStyle(countryStyle) });
     }
 
-    async function loadMapData() {
-      const [geoResponse, capitalsResponse] = await Promise.all([
-        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson'),
-        fetch('https://restcountries.com/v3.1/all?fields=name,capital,capitalInfo,cca3')
-      ]);
-      if (!geoResponse.ok || !capitalsResponse.ok) throw new Error('De kaartgegevens konden niet worden opgehaald.');
-      const geojson = await geoResponse.json();
-      const capitals = await capitalsResponse.json();
-      capitals.forEach(country => { if (country.cca3) countriesByCode[country.cca3] = country; });
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(url + ' gaf HTTP ' + response.status);
+      return response.json();
+    }
 
+    async function loadMapData() {
+      // Natural Earth GeoJSON bevat echte landgrenzen en werkt met GitHub Pages/CORS.
+      const geojson = await fetchJson('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
+      let capitals = [];
+      try {
+        capitals = await fetchJson('https://restcountries.com/v3.1/all?fields=name,capital,capitalInfo,cca3');
+      } catch (error) {
+        console.warn('Hoofdsteden konden niet worden geladen; de landkaart wordt wel getoond.', error);
+      }
+      capitals.forEach(country => { if (country.cca3) countriesByCode[country.cca3] = country; });
       L.geoJSON(geojson, { style:countryStyle, onEachFeature:showCountry }).addTo(map);
       capitals.forEach(country => {
         const coordinates = country.capitalInfo && country.capitalInfo.latlng;
         if (!coordinates || coordinates.length < 2 || !country.capital) return;
         const capital = country.capital[0];
         const name = country.name && (country.name.common || country.name.official) || 'Onbekend land';
-        const marker = L.marker([coordinates[0], coordinates[1]], { icon:L.divIcon({ className:'capital-marker', html:'' }) }).addTo(capitalLayer);
-        marker.bindPopup('<h3 class="popup-title">' + capital + '</h3><strong>Hoofdstad van:</strong> ' + name);
+        const marker = L.marker(coordinates, { icon:L.divIcon({ className:'capital-marker', html:'' }) }).addTo(capitalLayer);
+        marker.bindPopup('<h3 class="popup-title">' + escapeHtml(capital) + '</h3><strong>Hoofdstad van:</strong> ' + escapeHtml(name));
         marker.bindTooltip(capital, { className:'capital-label', direction:'right', offset:[7,0] });
       });
-      document.getElementById('status').textContent = capitals.length + ' landen geladen. Rode punten zijn hoofdsteden.';
+      status.textContent = geojson.features.length + ' landen geladen' + (capitals.length ? ' en ' + capitals.length + ' hoofdsteden.' : '.');
     }
 
     loadMapData().catch(error => {
-      document.getElementById('status').textContent = 'De kaart kon niet worden geladen. Controleer je internetverbinding en probeer opnieuw.';
-      console.error(error);
+      status.textContent = 'De wereldkaart kon niet worden geladen. Controleer je internetverbinding en vernieuw de pagina.';
+      console.error('Kaartfout:', error);
     });
   </script>
 </body>
