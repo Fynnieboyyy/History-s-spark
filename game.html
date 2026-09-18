@@ -7,10 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <!-- De vorige SRI-hash was ongeldig, waardoor Leaflet-CSS door de browser werd geblokkeerd. -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
-    :root { --ink:#332619; --paper:#ead6aa; --paper-dark:#c29b5e; --rust:#783b27; }
+    :root { --ink:#332619; --paper:#ead6aa; --paper-dark:#c29b5e; --rust:#783b27; --map-brown:#493523; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; color:var(--ink); font-family:'Libre Baskerville',serif; background:#493523; background-image:radial-gradient(circle,rgba(244,225,179,.25),transparent 65%); }
     header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px 5vw; color:var(--paper); border-bottom:4px double var(--paper-dark); }
@@ -21,18 +20,19 @@
     .intro { margin-bottom:20px; color:var(--paper); }
     .intro h2 { margin:0 0 8px; font:700 clamp(1.7rem,4vw,3rem) 'Cinzel',serif; }
     .intro p { margin:0; font:italic 1rem 'IM Fell English',serif; }
-    .map-frame { position:relative; overflow:hidden; padding:clamp(12px,2vw,28px); border:10px double var(--rust); background:var(--paper); box-shadow:0 20px 55px rgba(20,10,4,.4),inset 0 0 35px rgba(51,38,25,.18); }
-    .map-frame::before { content:'CARTA MUNDI · ANNO DOMINI'; position:absolute; top:9px; left:50%; transform:translateX(-50%); z-index:2; color:var(--rust); font:700 clamp(.55rem,1.3vw,.8rem) 'Cinzel',serif; white-space:nowrap; }
-    #map { height:min(72vh,760px); min-height:460px; margin-top:22px; border:1px solid rgba(51,38,25,.45); background:#a9c8c4; }
+    /* De kaart en de ruimte eronder hebben dezelfde bruine achtergrond. */
+    .map-frame { position:relative; overflow:hidden; padding:clamp(12px,2vw,28px); border:10px double var(--rust); background:var(--map-brown); box-shadow:0 20px 55px rgba(20,10,4,.4),inset 0 0 35px rgba(20,10,4,.35); }
+    .map-frame::before { content:'CARTA MUNDI · ANNO DOMINI'; position:absolute; top:9px; left:50%; transform:translateX(-50%); z-index:2; color:var(--paper); font:700 clamp(.55rem,1.3vw,.8rem) 'Cinzel',serif; white-space:nowrap; }
+    #map { height:min(72vh,760px); min-height:460px; margin-top:22px; border:1px solid rgba(234,214,170,.55); background:var(--map-brown); }
     .leaflet-container { font-family:'Libre Baskerville',serif; }
     .country-label,.capital-label { text-shadow:1px 1px 0 #ead6aa,-1px -1px 0 #ead6aa; font-size:10px; font-weight:700; white-space:nowrap; }
     .country-label { color:#332619; }
     .capital-label { color:#4c1e13; }
-    .capital-marker { width:10px!important; height:10px!important; margin-left:-5px!important; margin-top:-5px!important; border:2px solid #fff; border-radius:50%; background:#8b2d1d; box-shadow:0 1px 4px #332619; }
-    .legend { display:flex; flex-wrap:wrap; justify-content:center; gap:18px; padding:15px 5px 2px; color:#49321f; font-size:.78rem; }
-    .legend span::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border-radius:50%; background:#8b2d1d; border:2px solid #fff; box-shadow:0 1px 3px #332619; }
-    .legend span:first-child::before { border-radius:2px; background:#b7874e; border:0; box-shadow:0 0 0 1px #704b2b; }
-    #status { margin:10px 0 0; text-align:center; color:#6d4323; font-size:.78rem; }
+    .capital-marker { width:10px!important; height:10px!important; margin-left:-5px!important; margin-top:-5px!important; border:2px solid #fff; border-radius:50%; background:#8b2d1d; box-shadow:0 1px 4px rgba(0,0,0,.7); }
+    .legend { display:flex; flex-wrap:wrap; justify-content:center; gap:18px; padding:15px 5px 2px; color:var(--paper); font-size:.78rem; }
+    .legend span::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border-radius:50%; background:#8b2d1d; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.5); }
+    .legend span:first-child::before { border-radius:2px; background:#b7874e; border:0; box-shadow:0 0 0 1px #d3a05b; }
+    #status { margin:10px 0 0; text-align:center; color:var(--paper); font-size:.78rem; }
     .popup-title { margin:0 0 5px; color:var(--rust); font:700 1.05rem 'Cinzel',serif; }
     @media (max-width:600px) { header { align-items:flex-start; flex-direction:column; } .map-frame { padding:8px; border-width:6px; } #map { min-height:400px; } }
   </style>
@@ -65,12 +65,10 @@
       const p = feature.properties || {};
       return p.ADMIN || p.NAME_EN || p.name || p.NAME || 'Onbekend land';
     }
-
     function countryCode(feature) {
       const p = feature.properties || {};
       return p.ISO_A3 || p.ADM0_A3 || p.iso_a3 || p.ISO3 || p.cca3;
     }
-
     function showCountry(feature, layer) {
       const country = countriesByCode[countryCode(feature)];
       const name = countryName(feature);
@@ -79,22 +77,16 @@
       layer.bindTooltip(name, { className:'country-label', sticky:true, direction:'center', opacity:.9 });
       layer.on({ mouseover:e => e.target.setStyle(selectedStyle), mouseout:e => e.target.setStyle(countryStyle) });
     }
-
     async function fetchJson(url) {
       const response = await fetch(url);
       if (!response.ok) throw new Error(url + ' gaf HTTP ' + response.status);
       return response.json();
     }
-
     async function loadMapData() {
-      // Natural Earth GeoJSON bevat echte landgrenzen en werkt met GitHub Pages/CORS.
       const geojson = await fetchJson('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson');
       let capitals = [];
-      try {
-        capitals = await fetchJson('https://restcountries.com/v3.1/all?fields=name,capital,capitalInfo,cca3');
-      } catch (error) {
-        console.warn('Hoofdsteden konden niet worden geladen; de landkaart wordt wel getoond.', error);
-      }
+      try { capitals = await fetchJson('https://restcountries.com/v3.1/all?fields=name,capital,capitalInfo,cca3'); }
+      catch (error) { console.warn('Hoofdsteden konden niet worden geladen; de landkaart wordt wel getoond.', error); }
       capitals.forEach(country => { if (country.cca3) countriesByCode[country.cca3] = country; });
       L.geoJSON(geojson, { style:countryStyle, onEachFeature:showCountry }).addTo(map);
       capitals.forEach(country => {
@@ -104,11 +96,11 @@
         const name = country.name && (country.name.common || country.name.official) || 'Onbekend land';
         const marker = L.marker(coordinates, { icon:L.divIcon({ className:'capital-marker', html:'' }) }).addTo(capitalLayer);
         marker.bindPopup('<h3 class="popup-title">' + escapeHtml(capital) + '</h3><strong>Hoofdstad van:</strong> ' + escapeHtml(name));
-        marker.bindTooltip(capital, { className:'capital-label', direction:'right', offset:[7,0] });
+        // Toon de naam van elke hoofdstad direct op de kaart.
+        marker.bindTooltip(capital, { className:'capital-label', direction:'right', offset:[7,0], permanent:true, opacity:.95 });
       });
       status.textContent = geojson.features.length + ' landen geladen' + (capitals.length ? ' en ' + capitals.length + ' hoofdsteden.' : '.');
     }
-
     loadMapData().catch(error => {
       status.textContent = 'De wereldkaart kon niet worden geladen. Controleer je internetverbinding en vernieuw de pagina.';
       console.error('Kaartfout:', error);
