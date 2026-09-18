@@ -1,1 +1,58 @@
-
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History Spark — Wereldkaart</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#332619; --paper:#ead6aa; --paper-dark:#c29b5e; --rust:#783b27; --sea:#6e9b9a; --land:#b7874e; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); font-family:'Libre Baskerville',serif; background:#493523; background-image:radial-gradient(circle, rgba(244,225,179,.25), transparent 65%), repeating-linear-gradient(0deg,rgba(40,25,15,.08) 0 1px,transparent 1px 4px); }
+    header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px 5vw; color:var(--paper); border-bottom:4px double var(--paper-dark); }
+    header h1 { margin:0; font:700 clamp(1.4rem,3vw,2.2rem) 'Cinzel',serif; letter-spacing:.08em; } header h1 span { color:#d3a05b; }
+    .back { color:var(--paper); font-size:.82rem; text-decoration:none; border-bottom:1px solid var(--paper-dark); }
+    main { width:min(1400px,94%); margin:30px auto 50px; }
+    .intro { margin-bottom:20px; color:var(--paper); } .intro h2 { margin:0 0 8px; font:700 clamp(1.7rem,4vw,3rem) 'Cinzel',serif; } .intro p { margin:0; font:italic 1rem 'IM Fell English',serif; }
+    .map-frame { position:relative; overflow:hidden; padding:clamp(12px,2vw,28px); border:10px double var(--rust); background:var(--paper); box-shadow:0 20px 55px rgba(20,10,4,.4), inset 0 0 35px rgba(72,43,17,.3); }
+    .map-frame::before { content:'CARTA MUNDI · ANNO DOMINI'; position:absolute; top:9px; left:50%; transform:translateX(-50%); z-index:2; color:var(--rust); font:700 clamp(.55rem,1.3vw,.8rem) 'Cinzel',serif; letter-spacing:.18em; white-space:nowrap; }
+    svg { display:block; width:100%; height:auto; margin-top:22px; border:1px solid rgba(51,38,25,.45); background:#8eb1a6; }
+    .graticule { fill:none; stroke:#d9c28c; stroke-width:.8; opacity:.6; } .continent { fill:var(--land); stroke:#704b2b; stroke-width:1.5; stroke-linejoin:round; } .island { fill:#aa793f; stroke:#704b2b; stroke-width:1; } .label { fill:#4a301e; font:700 13px 'Cinzel',serif; letter-spacing:1px; text-anchor:middle; } .city { fill:#783b27; stroke:#f1ddb0; stroke-width:1.5; } .city-label { fill:#4a301e; font:11px 'Libre Baskerville',serif; }
+    .legend { display:flex; flex-wrap:wrap; justify-content:center; gap:18px; padding:15px 5px 2px; color:#49321f; font-size:.78rem; } .legend span::before { content:''; display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border:1px solid #704b2b; background:var(--land); } .legend span:last-child::before { border-radius:50%; background:var(--rust); }
+    @media (max-width:600px) { header { align-items:flex-start; flex-direction:column; } .map-frame { padding:8px; border-width:6px; } .label { font-size:9px; } .city-label { font-size:8px; } }
+  </style>
+</head>
+<body>
+  <header><h1>History <span>Spark</span></h1><a class="back" href="index.html">← Terug naar het begin</a></header>
+  <main>
+    <section class="intro"><h2>De wereld door de eeuwen heen</h2><p>Bestudeer de oude kaart en ontdek waar de verhalen beginnen.</p></section>
+    <section class="map-frame" aria-label="Historische wereldkaart">
+      <svg viewBox="0 0 1200 650" role="img" aria-labelledby="map-title">
+        <title id="map-title">Een gedetailleerde historische kaart van de wereld</title>
+        <g class="graticule">
+          <path d="M80 325H1120M80 245H1120M80 165H1120M80 405H1120M80 485H1120M210 70V580M340 70V580M470 70V580M600 70V580M730 70V580M860 70V580M990 70V580"/>
+          <ellipse cx="600" cy="325" rx="520" ry="255"/><ellipse cx="600" cy="325" rx="350" ry="255"/><ellipse cx="600" cy="325" rx="175" ry="255"/>
+        </g>
+        <!-- Noord- en Zuid-Amerika -->
+        <path class="continent" d="M108 136l34-28 52 2 25 20 50 7 28 31-17 24-38 2-16 30-30 7-18 45-30 19-17 42-28-20-13-48 18-33-24-35 12-29-31-16z"/>
+        <path class="continent" d="M205 323l39 14 22 37-8 38 19 42-16 40-20 52-28 45-21-21 6-54-19-34 14-40-18-36 11-35z"/>
+        <!-- Europa en Azië -->
+        <path class="continent" d="M500 143l30-21 36 8 24-16 35 16 29-4 28 21 45-4 37 21 52-2 32 21 66 2 42 33-17 39-43 10-32 19-52-10-34 19-59-8-38 17-43-26-30-1-15-28-39-13-12-32z"/>
+        <!-- Afrika -->
+        <path class="continent" d="M527 270l54-17 62 17 31 45-14 48-27 38-21 60-34 66-35-19-13-54-29-41 10-48-19-37z"/>
+        <!-- India en Zuidoost-Azië -->
+        <path class="continent" d="M711 282l45 16 36 35-17 30-29 3-22 42-23-23-4-44-22-22z"/>
+        <path class="continent" d="M802 302l59 10 22 28-30 17-14 31-28-17-14-31-34-12z"/>
+        <!-- Australië -->
+        <path class="continent" d="M895 449l42-19 70 12 42 37-11 47-43 27-53-9-27 16-39-31 6-45z"/>
+        <path class="island" d="M1055 526l27-4 17 21-19 27-29-5-12-22z"/><path class="island" d="M451 131l12-16 18 8-4 22z"/><path class="island" d="M841 383l13 9-8 18-14-8z"/>
+        <g class="labels"><text class="label" x="175" y="245">AMERICA</text><text class="label" x="620" y="205">EUROPA</text><text class="label" x="590" y="380">AFRIKA</text><text class="label" x="880" y="250">AZIË</text><text class="label" x="962" y="490">AUSTRALIË</text></g>
+        <g><circle class="city" cx="582" cy="188" r="5"/><text class="city-label" x="590" y="180">Londen</text><circle class="city" cx="650" cy="215" r="5"/><text class="city-label" x="658" y="210">Constantinopel</text><circle class="city" cx="625" cy="342" r="5"/><text class="city-label" x="634" y="358">Cairo</text><circle class="city" cx="778" cy="328" r="5"/><text class="city-label" x="786" y="322">Delhi</text><circle class="city" cx="275" cy="260" r="5"/><text class="city-label" x="282" y="253">Tenochtitlan</text></g>
+      </svg>
+      <div class="legend"><span>Landmassa</span><span>Belangrijke historische plaats</span></div>
+    </section>
+  </main>
+</body>
+</html>

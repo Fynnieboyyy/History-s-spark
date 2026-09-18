@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>History Spark</title>
+  <title>History Spark — Het Historisch Archief</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=IM+Fell+English:ital@0;1&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --nacht: #10152f;
-      --paars: #7757d9;
-      --roze: #f16bba;
-      --goud: #ffd166;
-      --wit: #fffaf2;
+      --ink: #30251b;
+      --paper: #e7d2a7;
+      --paper-light: #f4e7c6;
+      --rust: #873f29;
+      --gold: #b8893e;
+      --shadow: rgba(48, 37, 27, .35);
     }
 
     * { box-sizing: border-box; }
@@ -23,85 +24,48 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      overflow: hidden;
-      color: var(--wit);
-      font-family: 'Montserrat', sans-serif;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(241, 107, 186, .25), transparent 30%),
-        radial-gradient(circle at 80% 80%, rgba(119, 87, 217, .3), transparent 35%),
-        var(--nacht);
+      color: var(--ink);
+      font-family: 'Libre Baskerville', Georgia, serif;
+      background: #493523;
+      background-image: radial-gradient(ellipse at center, rgba(246, 226, 177, .25), transparent 65%), repeating-linear-gradient(0deg, rgba(48, 37, 27, .08) 0 1px, transparent 1px 4px);
     }
 
     .hero {
       position: relative;
-      width: min(90%, 900px);
-      padding: 90px 30px;
+      width: min(92%, 900px);
+      padding: clamp(48px, 9vw, 96px) clamp(24px, 7vw, 70px);
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, .2);
-      border-radius: 28px;
-      background: rgba(255, 255, 255, .08);
-      box-shadow: 0 25px 80px rgba(0, 0, 0, .35);
-      backdrop-filter: blur(12px);
+      border: 10px double var(--rust);
+      outline: 1px solid var(--gold);
+      outline-offset: -20px;
+      background: linear-gradient(rgba(244, 231, 198, .94), rgba(215, 187, 133, .94)), repeating-linear-gradient(25deg, transparent 0 5px, rgba(135, 63, 41, .08) 6px 7px);
+      box-shadow: 0 24px 60px var(--shadow), inset 0 0 60px rgba(94, 53, 22, .25);
     }
 
-    .spark {
-      display: block;
-      margin-bottom: 18px;
-      color: var(--goud);
-      font-size: 2rem;
-      letter-spacing: .5em;
-      animation: twinkle 2s ease-in-out infinite alternate;
-    }
-
-    h1 {
-      margin: 0;
-      font-family: 'Cinzel', serif;
-      font-size: clamp(3.2rem, 10vw, 7.5rem);
-      line-height: 1.05;
-      letter-spacing: .04em;
-      text-shadow: 0 8px 25px rgba(0, 0, 0, .3);
-    }
-
-    h1 span:first-child { color: var(--roze); }
-    h1 span:last-child { color: var(--goud); }
-
-    p {
-      margin: 28px auto 0;
-      max-width: 600px;
-      color: rgba(255, 250, 242, .82);
-      font-size: clamp(1rem, 2vw, 1.2rem);
-      line-height: 1.7;
-    }
-
-    .button {
-      display: inline-block;
-      margin-top: 34px;
-      padding: 14px 28px;
-      color: var(--nacht);
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--goud), var(--roze));
-      transition: transform .25s ease, box-shadow .25s ease;
-    }
-
-    .button:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 25px rgba(241, 107, 186, .3);
-    }
-
-    @keyframes twinkle {
-      from { opacity: .55; transform: scale(.95); }
-      to { opacity: 1; transform: scale(1.05); }
-    }
+    .seal { color: var(--rust); font-size: 2.4rem; letter-spacing: .3em; }
+    .date { margin: 12px 0 24px; color: var(--rust); font: 700 .75rem 'Cinzel', serif; letter-spacing: .28em; text-transform: uppercase; }
+    h1 { margin: 0; font: 800 clamp(3rem, 10vw, 7rem)/.95 'Cinzel', serif; letter-spacing: .04em; text-shadow: 2px 2px 0 rgba(184, 137, 62, .35); }
+    h1 span:first-child { color: var(--rust); }
+    h1 span:last-child { display: block; color: var(--ink); }
+    .rule { display: flex; align-items: center; gap: 14px; margin: 28px auto 0; max-width: 520px; color: var(--gold); }
+    .rule::before, .rule::after { content: ''; height: 1px; flex: 1; background: var(--gold); }
+    p { max-width: 590px; margin: 24px auto 0; font: italic clamp(1rem, 2vw, 1.2rem)/1.8 'IM Fell English', Georgia, serif; }
+    .button { display: inline-block; margin-top: 34px; padding: 15px 34px; color: var(--paper-light); font: 700 .9rem 'Cinzel', serif; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; border: 2px solid var(--ink); border-radius: 3px; background: var(--rust); box-shadow: 4px 4px 0 var(--gold); transition: transform .2s, box-shadow .2s; }
+    .button:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--gold); }
+    .corner { position: absolute; color: var(--rust); font-size: 1.4rem; }
+    .top-left { top: 18px; left: 25px; } .top-right { top: 18px; right: 25px; } .bottom-left { bottom: 18px; left: 25px; } .bottom-right { bottom: 18px; right: 25px; }
   </style>
 </head>
 <body>
   <main class="hero">
-    <span class="spark">✦ ✧ ✦</span>
-    <h1><span>History</span> <span>Spark</span></h1>
+    <span class="corner top-left">❧</span><span class="corner top-right">❧</span>
+    <div class="seal">✦ ❖ ✦</div>
+    <div class="date">Een atlas van vervlogen tijden</div>
+    <h1><span>History</span><span>Spark</span></h1>
+    <div class="rule">✦</div>
     <p>Ontdek de verhalen, mensen en momenten die onze geschiedenis hebben laten schitteren.</p>
-    <a class="button" href="#ontdek">Ontdek meer</a>
+    <a class="button" href="game.html">Doorgaan naar de kaart</a>
+    <span class="corner bottom-left">❧</span><span class="corner bottom-right">❧</span>
   </main>
 </body>
 </html>
